@@ -9,9 +9,11 @@ const httpServer = createServer(app);
 const io = new Server(httpServer, { /* options */ });
 
 io.on("connection", (socket) => {
+  io.emit('chat message',`${socket.id} connected to chat`);
   console.log('A user connected with ID:', socket.id);
   socket.on('disconnect', () => {
     console.log(socket.id, ' user disconnected');
+    io.emit('chat message',`${socket.id} disconnected from chat`);
   });
   socket.on('chat message', (msg) => {
     io.emit('chat message', msg);
