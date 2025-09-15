@@ -30,6 +30,7 @@ io.on('connection', (socket) => {
   socket.on('chat message', (msg) => {
     // Prepend the user's stored nickname to the message
     // Then broadcast it to EVERYONE (including the sender)
+    socket.broadcast.emit('not_typing');
     io.emit('chat message', `${socket.nickname}: ${msg}`);
   });
 
@@ -40,6 +41,11 @@ io.on('connection', (socket) => {
       io.emit('chat message', `${socket.nickname} has left the chat.`);
     }
   });
+
+  socket.on('typing', ()=>{
+    socket.broadcast.emit('user_typing', `${socket.nickname} is typing...`);
+  })
+
 });
 
 httpServer.listen(3000, () => {

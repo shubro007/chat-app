@@ -48,8 +48,9 @@
 
   <div id="chat-window" style="display: none;">
     <ul id="messages"></ul>
+    <p id="typingid"></p>
     <form id="chat-form" action="">
-      <input id="chat-input" autocomplete="off" /><button>Send</button>
+      <input id="chat-input" /><button>Send</button>
     </form>
   </div>
 
@@ -64,7 +65,7 @@
     var chatForm = document.getElementById('chat-form');
     var chatInput = document.getElementById('chat-input');
     var messages = document.getElementById('messages');
-
+    var typingid = document.getElementById('typingid');
     // Handle the Join Form submission
     joinForm.addEventListener('submit', function(e) {
       e.preventDefault();
@@ -75,6 +76,8 @@
         // Hide the join form and show the chat window
         joinForm.style.display = 'none';
         chatWindow.style.display = 'block';
+        
+
       }
     });
 
@@ -96,6 +99,18 @@
       // Scroll to the bottom
       messages.scrollTop = messages.scrollHeight;
     });
+
+    chatInput.addEventListener("input", ()=>{
+        socket.emit('typing');
+    })
+    socket.on('user_typing', function(msg) {
+        console.log(msg)
+        typingid.textContent = msg;
+    })
+    socket.on('not_typing', function(){
+        typingid.textContent = "";
+    })
+
   </script>
 </body>
 </html> 
