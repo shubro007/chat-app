@@ -1,45 +1,101 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Socket.IO chat</title>
-    <style>
-      body { margin: 0; padding-bottom: 3rem; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+<head>
+  <title>Socket.IO chat</title>
+  <style>
+    * { box-sizing: border-box; font-family: sans-serif; }
+    html, body { height: 100%; margin: 0; padding: 0; }
+    body {
+      background-color: rgb(228, 228, 228);
+      /* This will center the content */
+      display: grid;
+      place-items: center;
+    }
+    #join-form, #chat-form {
+      border: 4px dashed black;
+      padding: 20px;
+      background: #fff;
+    }
+    #chat-window {
+      width: 90%;
+      max-width: 600px;
+    }
+    #messages {
+      list-style-type: none;
+      margin: 0;
+      padding: 0;
+      border: 1px solid #ccc;
+      height: 300px;
+      overflow-y: scroll;
+      background: #fafafa;
+      padding: 10px;
+    }
+    #messages li { padding: 5px 10px; }
+    #messages li:nth-child(odd) { background: #eee; }
+    #chat-form {
+      display: flex; /* Makes input and button align nicely */
+    }
+    #chat-input { flex-grow: 1; }
+  </style>
+</head>
+<body>
 
-      #form { background: rgba(0, 0, 0, 0.15); padding: 0.25rem; position: fixed; bottom: 0; left: 0; right: 0; display: flex; height: 3rem; box-sizing: border-box; backdrop-filter: blur(10px); }
-      #input { border: none; padding: 0 1rem; flex-grow: 1; border-radius: 2rem; margin: 0.25rem; }
-      #input:focus { outline: none; }
-      #form > button { background: #333; border: none; padding: 0 1rem; margin: 0.25rem; border-radius: 3px; outline: none; color: #fff; }
+  <form id="join-form" action="">
+    <div>Enter your nickname</div>
+    <input id="nickname" type="text" autocomplete="off">
+    <button>Join Chat</button>
+  </form>
 
-      #messages { list-style-type: none; margin: 0; padding: 0; }
-      #messages > li { padding: 0.5rem 1rem; }
-      #messages > li:nth-child(odd) { background: #efefef; }
-    </style>
-  </head>
-  <body>
+  <div id="chat-window" style="display: none;">
     <ul id="messages"></ul>
-    <form id="form" action="">
-      <input id="input" autocomplete="off" /><button>Send</button>
+    <form id="chat-form" action="">
+      <input id="chat-input" autocomplete="off" /><button>Send</button>
     </form>
-        <script src="/socket.io/socket.io.js"></script>
-        <script>
-        var socket = io();
-        var form = document.getElementById('form');
-        var input = document.getElementById('input');
+  </div>
 
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            if (input.value) {
-            socket.emit('chat message', input.value);
-            input.value = '';
-            }
-        });
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    var socket = io();
 
-          socket.on('chat message', function(msg) {
-            var item = document.createElement('li');
-            item.textContent = msg;
-            messages.appendChild(item);
-            window.scrollTo(0, document.body.scrollHeight);
-        });
-        </script>
-  </body>
-</html>
+    // Get all the elements
+    var joinForm = document.getElementById('join-form');
+    var nicknameInput = document.getElementById('nickname');
+    var chatWindow = document.getElementById('chat-window');
+    var chatForm = document.getElementById('chat-form');
+    var chatInput = document.getElementById('chat-input');
+    var messages = document.getElementById('messages');
+
+    // Handle the Join Form submission
+    joinForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      if (nicknameInput.value) {
+        // Send the nickname to the server
+        socket.emit('nick name', nicknameInput.value);
+
+        // Hide the join form and show the chat window
+        joinForm.style.display = 'none';
+        chatWindow.style.display = 'block';
+      }
+    });
+
+    // Handle the Chat Form submission
+    chatForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      if (chatInput.value) {
+        // Send the chat message to the server
+        socket.emit('chat message', chatInput.value);
+        chatInput.value = '';
+      }
+    });
+
+    // Listen for 'chat message' events from the server
+    socket.on('chat message', function(msg) {
+      var item = document.createElement('li');
+      item.textContent = msg;
+      messages.appendChild(item);
+      // Scroll to the bottom
+      messages.scrollTop = messages.scrollHeight;
+    });
+  </script>
+</body>
+</html> 
